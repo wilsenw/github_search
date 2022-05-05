@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/user.dart';
-import '../services/http_services.dart';
 
 class UserScreen extends StatefulWidget {
-  final String search;
-  const UserScreen({Key? key, required this.search}) : super(key: key);
+  const UserScreen({Key? key}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return _UserScreenState();
@@ -15,6 +14,8 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final ScrollController _scrollController = ScrollController();
   int _currentMax = 10;
+  int _currentMin = 0;
+  bool _lazyLoading = true;
 
   @override
   void initState() {
@@ -22,7 +23,9 @@ class _UserScreenState extends State<UserScreen> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _loadMore();
+        if (_lazyLoading) {
+          _loadMore();
+        }
       }
     });
   }
@@ -34,19 +37,20 @@ class _UserScreenState extends State<UserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String search = widget.search;
-    return FutureBuilder(
-        future: getUserData(search),
-        builder: (BuildContext context, AsyncSnapshot<List<MUser>> snapshot) {
-          List<MUser>? userData = snapshot.data;
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return ListView.builder(
+    final List<MUser> userData = Provider.of<List<MUser>>(context);
+    return Column(
+      children: [
+        Expanded(
+          flex: 1,
+          child: buttons(userData.length),
+        ),
+        Expanded(
+            flex: 7,
+            child: ListView.builder(
                 controller: _scrollController,
-                itemCount: itemCount(snapshot.data?.length, _currentMax),
+                itemCount: itemCount(userData.length, _currentMax),
                 itemBuilder: (context, index) {
-                  if (index == itemCount(snapshot.data?.length, _currentMax)) {
+                  if (index == itemCount(userData.length, _currentMax)) {
                     return const CupertinoActivityIndicator();
                   }
                   return Card(
@@ -55,26 +59,141 @@ class _UserScreenState extends State<UserScreen> {
                     child: Row(
                       children: [
                         Image.network(
-                          userData![index].imageURL,
+                          userData[index + _currentMin].imageURL,
                           height: 62,
                         ),
                         const SizedBox(
                           width: 20,
                         ),
-                        Text(userData[index].username,
+                        Text(userData[index + _currentMin].username,
                             style: Theme.of(context).textTheme.bodyLarge),
                       ],
                     ),
                   ));
+                })),
+        pagination(userData.length),
+      ],
+    );
+  }
+
+  Widget pagination(int totalItem) {
+    List list = [];
+    for (int i = 1; i <= (totalItem / 10).ceil(); i++) {
+      list.add(i);
+    }
+    if (_lazyLoading) {
+      return const SizedBox();
+    } else {
+      if (totalItem < 10) {
+        return const SizedBox();
+      } else {
+        return Expanded(
+          flex: 1,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              for (int i in list)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentMax = 10;
+                      _currentMin = (i * 10) - 10;
+                    });
+                  },
+                  child: Text(i.toString()),
+                )
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Widget buttons(int totalItem) {
+    if (_lazyLoading) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 60.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.teal,
+                padding: const EdgeInsets.all(15),
+              ),
+              child: const Text('Lazy Loading'),
+              onPressed: () {
+                setState(() {
+                  _lazyLoading = true;
                 });
-          }
-        });
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                  primary: Colors.teal,
+                  side: const BorderSide(color: Colors.teal, width: 5),
+                  padding: const EdgeInsets.all(15)),
+              child: const Text('With Index'),
+              onPressed: () {
+                setState(() {
+                  _lazyLoading = false;
+                  if (_currentMax > totalItem) {
+                    _currentMin = totalItem - 10;
+                    if (_currentMin < 0) {
+                      _currentMin = 0;
+                    }
+                  } else {
+                    _currentMin = _currentMax - 10;
+                  }
+                  _currentMax = 10;
+                });
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.only(right: 60.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            TextButton(
+              style: TextButton.styleFrom(
+                  primary: Colors.teal,
+                  side: const BorderSide(color: Colors.teal, width: 5),
+                  padding: const EdgeInsets.all(15)),
+              child: const Text('Lazy Loading'),
+              onPressed: () {
+                setState(() {
+                  _currentMin = 0;
+                  _lazyLoading = true;
+                });
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                primary: Colors.white,
+                backgroundColor: Colors.teal,
+                padding: const EdgeInsets.all(15),
+              ),
+              child: const Text('With Index'),
+              onPressed: () {
+                setState(() {
+                  _currentMin = 0;
+                  _lazyLoading = false;
+                });
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 
 int itemCount(int? length, int max) {
-  print(length);
-  print(max);
   if (length == null) {
     return 0;
   } else if (length < max) {
