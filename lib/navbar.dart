@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:github_search/screens/issues_screen.dart';
 import 'package:github_search/screens/repo_screen.dart';
 import 'package:github_search/screens/user_screen.dart';
+import 'package:github_search/services/http_services.dart';
+import 'models/user.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({Key? key}) : super(key: key);

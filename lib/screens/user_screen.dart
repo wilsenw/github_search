@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../models/user.dart';
-import 'dart:convert' as convert;
+import '../services/http_services.dart';
 
 class UserScreen extends StatefulWidget {
   final String search;
@@ -13,27 +13,73 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  final ScrollController _scrollController = ScrollController();
+  int _currentMax = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _loadMore();
+      }
+    });
+  }
+
+  _loadMore() {
+    _currentMax += 10;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     String search = widget.search;
-    getUserData(search);
-    return Text("User Screen",
-        style: Theme.of(context).textTheme.headlineMedium);
+    return FutureBuilder(
+        future: getUserData(search),
+        builder: (BuildContext context, AsyncSnapshot<List<MUser>> snapshot) {
+          List<MUser>? userData = snapshot.data;
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return ListView.builder(
+                controller: _scrollController,
+                itemCount: itemCount(snapshot.data?.length, _currentMax),
+                itemBuilder: (context, index) {
+                  if (index == itemCount(snapshot.data?.length, _currentMax)) {
+                    return const CupertinoActivityIndicator();
+                  }
+                  return Card(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Image.network(
+                          userData![index].imageURL,
+                          height: 62,
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Text(userData[index].username,
+                            style: Theme.of(context).textTheme.bodyLarge),
+                      ],
+                    ),
+                  ));
+                });
+          }
+        });
   }
 }
 
-void getUserData(String search) async {
-  var url = Uri.https('api.github.com', '/search/users', {'q': search});
-
-  // Await the http get response, then decode the json-formatted response.
-  var response = await http.get(url);
-  if (response.statusCode == 200) {
-    var jsonResponse =
-        convert.jsonDecode(response.body) as Map<String, dynamic>;
-    var itemCount = jsonResponse['total_count'];
-    // https://github.com/kvnwj/pensil/blob/master/lib/services/m_coin_services.dart
-    print('Number of books about http: $itemCount.');
+int itemCount(int? length, int max) {
+  print(length);
+  print(max);
+  if (length == null) {
+    return 0;
+  } else if (length < max) {
+    return length;
   } else {
-    print('Request failed with status: ${response.statusCode}.');
+    return max;
   }
 }
