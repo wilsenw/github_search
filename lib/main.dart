@@ -1,6 +1,7 @@
 //============ Aplikasi Searching Github ================
 //============ Dibuat oleh: Wilsen Widjaja ================
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'navbar.dart';
 import 'shared/style.dart';
 
@@ -13,6 +14,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(theme: theme(), home: const NavBar());
   }
 
