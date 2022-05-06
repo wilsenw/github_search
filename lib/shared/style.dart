@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-//font size
-const largeTextSize = 30.0;
-const mediumTextSize = 20.0;
+//============ Style Text Aplikasi ================
+// Ukuran Font
+const largeTextSize = 20.0;
+const mediumTextSize = 16.0;
 const bodyTextSize = 14.0;
 const smallTextSize = 10.0;
 
+// Style masing-masing text
 const title1TextStyle = TextStyle(
   fontWeight: FontWeight.w600,
   fontSize: largeTextSize,

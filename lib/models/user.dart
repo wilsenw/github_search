@@ -1,3 +1,4 @@
+//============ Model untuk user ================
 class MUser {
   String username;
   String imageURL;

@@ -4,8 +4,11 @@ import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import 'dart:convert' as convert;
 
+//============ Fungsi-fungsi HTTP ================
+//============ Fungsi untuk mengambil data User ================
 Future<List<MUser>> getUserData(String search) async {
-  var url = Uri.https('api.github.com', '/search/users', {'q': search});
+  var url = Uri.https(
+      'api.github.com', '/search/users', {'q': search}); // GET dari Github API
 
   // Await the http get response, then decode the json-formatted response.
   var response = await http.get(url);
@@ -18,14 +21,16 @@ Future<List<MUser>> getUserData(String search) async {
           username: jsonResponse['items'][i]['login'],
           imageURL: jsonResponse['items'][i]['avatar_url']));
     }
-    return userData;
+    return userData; // data dalam bentuk future list
   } else {
     return [];
   }
 }
 
+//============ Fungsi untuk mengambil data repo ================
 Future<List<MRepo>> getRepoData(String search) async {
-  var url = Uri.https('api.github.com', '/search/repositories', {'q': search});
+  var url = Uri.https('api.github.com', '/search/repositories',
+      {'q': search}); // GET dari Github API
 
   // Await the http get response, then decode the json-formatted response.
   var response = await http.get(url);
@@ -42,14 +47,16 @@ Future<List<MRepo>> getRepoData(String search) async {
           forks: jsonResponse['items'][i]['forks_count'],
           imageURL: jsonResponse['items'][i]['owner']['avatar_url']));
     }
-    return repoData;
+    return repoData; // data dalam bentuk future list
   } else {
     return [];
   }
 }
 
+//============ Fungsi untuk mengambil data issue ================
 Future<List<MIssue>> getIssueData(String search) async {
-  var url = Uri.https('api.github.com', '/search/issues', {'q': search});
+  var url = Uri.https(
+      'api.github.com', '/search/issues', {'q': search}); // GET dari Github API
 
   // Await the http get response, then decode the json-formatted response.
   var response = await http.get(url);
@@ -64,7 +71,7 @@ Future<List<MIssue>> getIssueData(String search) async {
           state: jsonResponse['items'][i]['state'],
           imageURL: jsonResponse['items'][i]['user']['avatar_url']));
     }
-    return issueData;
+    return issueData; // data dalam bentuk future list
   } else {
     return [];
   }

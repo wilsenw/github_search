@@ -8,6 +8,7 @@ import 'package:github_search/services/http_services.dart';
 import 'package:provider/provider.dart';
 import 'models/user.dart';
 
+//============ Navigasi Aplikasi ================
 class NavBar extends StatefulWidget {
   const NavBar({Key? key}) : super(key: key);
   @override
@@ -20,6 +21,7 @@ class _NavBarState extends State<NavBar> {
   final _searchController = TextEditingController();
   String search = "";
 
+  //============ Provider untuk semua layar ================
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -34,44 +36,60 @@ class _NavBarState extends State<NavBar> {
             value: Stream.fromFuture(getRepoData(search)),
             initialData: const []),
       ],
-      child: MaterialApp(
-        home: DefaultTabController(
-          length: 3,
-          child: Scaffold(
-            appBar: AppBar(
-              title: ListTile(
-                leading: IconButton(
-                  icon: const Icon(Icons.search),
-                  iconSize: 28,
-                  onPressed: () {
-                    setState(() {
-                      search = _searchController.text;
-                    });
-                  },
+      //============ AppBar ================
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          body: NestedScrollView(
+            floatHeaderSlivers: true,
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              SliverAppBar(
+                backgroundColor: Theme.of(context).primaryColor,
+                pinned: true,
+                floating: true,
+                snap: false,
+                //============ Search Bar ================
+                title: ListTile(
+                  leading: IconButton(
+                    icon: const Icon(Icons.search),
+                    iconSize: 28,
+                    onPressed: () {
+                      setState(() {
+                        search = _searchController.text;
+                      });
+                    },
+                  ),
+                  title: TextField(
+                    decoration: const InputDecoration(hintText: "Search"),
+                    onSubmitted: (String str) {
+                      setState(() {
+                        search = str;
+                      });
+                    },
+                    controller: _searchController,
+                  ),
                 ),
-                title: TextField(
-                  controller: _searchController,
+                //============ Tab Bar untuk Navigasi ================
+                bottom: TabBar(
+                  tabs: [
+                    Tab(
+                        child: Text("User",
+                            style: Theme.of(context).textTheme.bodyLarge)),
+                    Tab(
+                        child: Text("Issues",
+                            style: Theme.of(context).textTheme.bodyLarge)),
+                    Tab(
+                        child: Text("Repositories",
+                            style: Theme.of(context).textTheme.bodyLarge)),
+                  ],
                 ),
-              ),
-              bottom: TabBar(
-                tabs: [
-                  Tab(
-                      child: Text("User",
-                          style: Theme.of(context).textTheme.bodyMedium)),
-                  Tab(
-                      child: Text("Issues",
-                          style: Theme.of(context).textTheme.bodyMedium)),
-                  Tab(
-                      child: Text("Repositories",
-                          style: Theme.of(context).textTheme.bodyMedium)),
-                ],
-              ),
-            ),
-            body: TabBarView(
+              )
+            ],
+            body: const TabBarView(
               children: [
-                const UserScreen(),
-                IssueScreen(search: search),
-                const RepoScreen(),
+                UserScreen(), // Screen user
+                IssueScreen(), // Screen issues
+                RepoScreen(), // Screen repositories
               ],
             ),
           ),
