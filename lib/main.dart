@@ -1,3 +1,5 @@
+//============ Aplikasi Searching Github ================
+//============ Dibuat oleh: Wilsen Widjaja ================
 import 'package:flutter/material.dart';
 import 'navbar.dart';
 import 'shared/style.dart';
@@ -9,19 +11,20 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: _theme(),
-      home: const NavBar(),
-    );
+    return MaterialApp(theme: theme(), home: const NavBar());
   }
 
-  ThemeData _theme() {
+  //============ Theme untuk keseluruhan aplikasi ================
+  ThemeData theme() {
     return ThemeData(
-      //apply style untuk masing - masing text
+      //apply style untuk warna
+      primaryColor: Colors.greenAccent,
+      backgroundColor: Colors.grey[100],
+      //apply style untuk font
       fontFamily: 'Montserrat',
+      //apply style untuk text
       textTheme: const TextTheme(
         headlineMedium: title1TextStyle, //size besar, hitam
         bodyLarge: body1TextStyle, //size medium, hitam

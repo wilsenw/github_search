@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
 
+//============ Layar User ================
 class UserScreen extends StatefulWidget {
   const UserScreen({Key? key}) : super(key: key);
   @override
@@ -12,6 +13,7 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  //============ Inisialisasi dan Lazy Loading ================
   final ScrollController _scrollController = ScrollController();
   int _currentMax = 10;
   int _currentMin = 0;
@@ -35,47 +37,56 @@ class _UserScreenState extends State<UserScreen> {
     setState(() {});
   }
 
+  //============ Tampilan Layar Issue ================
   @override
   Widget build(BuildContext context) {
     final List<MUser> userData = Provider.of<List<MUser>>(context);
-    return Column(
-      children: [
-        Expanded(
-          flex: 1,
-          child: buttons(userData.length),
-        ),
-        Expanded(
-            flex: 7,
-            child: ListView.builder(
-                controller: _scrollController,
-                itemCount: itemCount(userData.length, _currentMax),
-                itemBuilder: (context, index) {
-                  if (index == itemCount(userData.length, _currentMax)) {
-                    return const CupertinoActivityIndicator();
-                  }
-                  return Card(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Image.network(
-                          userData[index + _currentMin].imageURL,
-                          height: 62,
+    return Container(
+      color: Theme.of(context).backgroundColor,
+      child: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: buttons(userData.length), // tombol lazy loading & with index
+          ),
+          Expanded(
+              flex: 8,
+              child: MediaQuery.removePadding(
+                removeTop: true,
+                context: context,
+                child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: itemCount(userData.length, _currentMax),
+                    itemBuilder: (context, index) {
+                      if (index == itemCount(userData.length, _currentMax)) {
+                        return const CupertinoActivityIndicator();
+                      }
+                      return Card(
+                          child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Image.network(
+                              userData[index + _currentMin].imageURL,
+                              height: 62,
+                            ),
+                            const SizedBox(
+                              width: 20,
+                            ),
+                            Text(userData[index + _currentMin].username,
+                                style: Theme.of(context).textTheme.bodyLarge),
+                          ],
                         ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Text(userData[index + _currentMin].username,
-                            style: Theme.of(context).textTheme.bodyLarge),
-                      ],
-                    ),
-                  ));
-                })),
-        pagination(userData.length),
-      ],
+                      ));
+                    }),
+              )),
+          pagination(userData.length),
+        ],
+      ),
     );
   }
 
+  //============ Tombol Page Number ================
   Widget pagination(int totalItem) {
     List list = [];
     for (int i = 1; i <= (totalItem / 10).ceil(); i++) {
@@ -100,7 +111,10 @@ class _UserScreenState extends State<UserScreen> {
                       _currentMin = (i * 10) - 10;
                     });
                   },
-                  child: Text(i.toString()),
+                  child: Text(
+                    i.toString(),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 )
             ],
           ),
@@ -109,6 +123,7 @@ class _UserScreenState extends State<UserScreen> {
     }
   }
 
+  //============ Tombol Lazy Loading & With Index ================
   Widget buttons(int totalItem) {
     if (_lazyLoading) {
       return Padding(
@@ -193,6 +208,7 @@ class _UserScreenState extends State<UserScreen> {
   }
 }
 
+//============ Jumlah item pada list ================
 int itemCount(int? length, int max) {
   if (length == null) {
     return 0;

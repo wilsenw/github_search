@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:github_search/models/issue.dart';
 import 'package:provider/provider.dart';
 
-import '../services/http_services.dart';
-
+//============ Layar Issue ================
 class IssueScreen extends StatefulWidget {
-  final String search;
-  const IssueScreen({Key? key, required this.search}) : super(key: key);
+  const IssueScreen({Key? key}) : super(key: key);
   @override
   State<StatefulWidget> createState() {
     return _IssueScreenState();
@@ -15,6 +13,7 @@ class IssueScreen extends StatefulWidget {
 }
 
 class _IssueScreenState extends State<IssueScreen> {
+  //============ Inisialisasi dan Lazy Loading ================
   final ScrollController _scrollController = ScrollController();
   int _currentMax = 10;
   int _currentMin = 0;
@@ -38,71 +37,88 @@ class _IssueScreenState extends State<IssueScreen> {
     setState(() {});
   }
 
+  //============ Tampilan Layar Issue ================
   @override
   Widget build(BuildContext context) {
     final List<MIssue> issueData = Provider.of<List<MIssue>>(context);
-    return Column(
-      children: [
-        Expanded(
-          flex: 1,
-          child: buttons(issueData.length),
-        ),
-        Expanded(
-          flex: 7,
-          child: ListView.builder(
-              controller: _scrollController,
-              itemCount: itemCount(issueData.length, _currentMax),
-              itemBuilder: (context, index) {
-                if (index == itemCount(issueData.length, _currentMax)) {
-                  return const CupertinoActivityIndicator();
-                }
-                return Card(
-                    child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Image.network(
-                          issueData[index + _currentMin].imageURL,
-                          height: 62,
-                        ),
+    return Container(
+      color: Theme.of(context).backgroundColor,
+      child: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child:
+                buttons(issueData.length), // tombol lazy loading & with index
+          ),
+          Expanded(
+            flex: 7,
+            child: MediaQuery.removePadding(
+              removeTop: true,
+              context: context,
+              child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: itemCount(issueData.length, _currentMax),
+                  itemBuilder: (context, index) {
+                    if (index == itemCount(issueData.length, _currentMax)) {
+                      return const CupertinoActivityIndicator();
+                    }
+                    return Card(
+                        child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Image.network(
+                              issueData[index + _currentMin].imageURL,
+                              height: 62,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(issueData[index + _currentMin].title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium),
+                                Text(
+                                    issueData[index + _currentMin]
+                                        .date
+                                        .substring(0, 10),
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                    "State: " +
+                                        issueData[index + _currentMin].state,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        flex: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(issueData[index + _currentMin].title,
-                                style: Theme.of(context).textTheme.bodyLarge),
-                            Text(issueData[index + _currentMin].date,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                "State: " +
-                                    issueData[index + _currentMin].state,
-                                style: Theme.of(context).textTheme.bodyMedium),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ));
-              }),
-        ),
-        pagination(issueData.length),
-      ],
+                    ));
+                  }),
+            ),
+          ),
+          pagination(issueData.length),
+        ],
+      ),
     );
   }
 
+  //============ Tombol Page Number ================
   Widget pagination(int totalItem) {
     List list = [];
     for (int i = 1; i <= (totalItem / 10).ceil(); i++) {
@@ -127,7 +143,8 @@ class _IssueScreenState extends State<IssueScreen> {
                       _currentMin = (i * 10) - 10;
                     });
                   },
-                  child: Text(i.toString()),
+                  child: Text(i.toString(),
+                      style: Theme.of(context).textTheme.headlineMedium),
                 )
             ],
           ),
@@ -136,6 +153,7 @@ class _IssueScreenState extends State<IssueScreen> {
     }
   }
 
+  //============ Tombol Lazy Loading & With Index ================
   Widget buttons(int totalItem) {
     if (_lazyLoading) {
       return Padding(
@@ -220,6 +238,7 @@ class _IssueScreenState extends State<IssueScreen> {
   }
 }
 
+//============ Jumlah item pada list ================
 int itemCount(int? length, int max) {
   if (length == null) {
     return 0;

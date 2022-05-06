@@ -1,3 +1,4 @@
+//============ Model untuk issue ================
 class MIssue {
   String title;
   String date;
